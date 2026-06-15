@@ -3,21 +3,13 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FSY Booking Test</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body style="font-family: sans-serif; text-align: center; padding: 40px;">
     <h1>🧘 Free Spirit Yoga</h1>
     <p id="status">Loading...</p>
-    <input id="email" type="email" placeholder="Enter your email" style="padding: 10px; font-size: 16px;"><br><br>
-    <button onclick="sendOTP()" style="padding: 10px 20px; font-size: 16px;">Send OTP</button>
-    <br><br>
-    <input id="otp" type="text" placeholder="Enter OTP code" style="padding: 10px; font-size: 16px;"><br><br>
-    <button onclick="verifyOTP()" style="padding: 10px 20px; font-size: 16px;">Verify</button>
+
     <script>
-      const supabase = window.supabase.createClient(
-        'https://thiqtqxuwfoocbrmrvhx.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaXF0cXh1d2Zvb2Nicm1ydmh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTAxMzAsImV4cCI6MjA5NzA4NjEzMH0.yQiWm1ylsguj9EQxCZGoHU-mKNwGKoN3eqZoDrKCW34'
-      )
-      document.getElementById('status').textContent = 'Ready'
-      async function sendOTP() {
-        const email =
+      document.getElementById('status').textContent = 'JavaScript is working!'
+    </script>
+  </body>
+</html>
