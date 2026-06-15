@@ -19,13 +19,7 @@
     <script>
       window.onload = function() {
         var tap = Tapjsli('pk_test_TUBf1D3EaSRGw7ONXqJjrFsP')
-
-        var elements = tap.elements({
-          mode: 'payment',
-          merchant: { id: '' },
-          transaction: { amount: 50, currency: 'SAR' },
-          acceptance: { supportedBrands: ['VISA', 'MASTERCARD'] }
-        })
+        var elements = tap.elements({})
 
         var style = {
           base: {
@@ -34,11 +28,24 @@
             fontFamily: 'sans-serif',
             fontSmoothing: 'antialiased',
             fontSize: '16px',
+            '::placeholder': { color: 'rgba(0, 0, 0, 0.26)', fontSize: '15px' }
           },
           invalid: { color: 'red' }
         }
 
-        var card = elements.create('card', { style: style })
+        var paymentOptions = {
+          currencyCode: ['SAR'],
+          labels: {
+            cardNumber: 'Card Number',
+            expirationDate: 'MM/YY',
+            cvv: 'CVV',
+            cardHolder: 'Card Holder Name'
+          },
+          TextDirection: 'ltr',
+          paymentAllowed: ['VISA', 'MASTERCARD', 'MADA']
+        }
+
+        var card = elements.create('card', { style: style }, paymentOptions)
         card.mount('#element-container')
 
         card.addEventListener('change', function(event) {
@@ -50,7 +57,7 @@
         })
 
         card.addEventListener('ready', function() {
-          document.getElementById('status').textContent = 'Ready — enter your card details'
+          document.getElementById('status').textContent = 'Enter your card details below'
           document.getElementById('pay-btn').style.display = 'inline-block'
         })
 
