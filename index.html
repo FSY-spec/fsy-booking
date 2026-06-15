@@ -61,14 +61,15 @@
           document.getElementById('pay-btn').style.display = 'inline-block'
         })
 
-        window.pay = async function() {
+        window.pay = function() {
           document.getElementById('status').textContent = 'Processing...'
-          const { token, error } = await tap.createToken(card)
-          if (error) {
-            document.getElementById('status').textContent = 'Error: ' + error.message
-          } else {
-            document.getElementById('status').textContent = '✅ Token created: ' + token.id
-          }
+          tap.createToken(card).then(function(result) {
+            if (result.error) {
+              document.getElementById('status').textContent = 'Error: ' + result.error.message
+            } else {
+              document.getElementById('status').textContent = '✅ Token created: ' + result.id
+            }
+          })
         }
       }
     </script>
