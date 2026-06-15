@@ -18,6 +18,11 @@ export default async function handler(req, res) {
         threeDSecure: true,
         save_card: false,
         source: { id: token },
+        customer: {
+          first_name: 'Test',
+          last_name: 'User',
+          email: 'test@freespirityoga.sa'
+        },
         redirect: { url: 'https://fsy-booking-test.vercel.app' }
       })
     })
