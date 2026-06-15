@@ -46,4 +46,16 @@
       }
     </script>
   </body>
+</html>        const email = document.getElementById('email').value
+        const token = document.getElementById('otp').value
+        document.getElementById('status').textContent = 'Verifying...'
+        const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+        if (error) {
+          document.getElementById('status').textContent = 'Error: ' + error.message
+        } else {
+          document.getElementById('status').textContent = 'Logged in as: ' + data.user.email
+        }
+      }
+    </script>
+  </body>
 </html>
