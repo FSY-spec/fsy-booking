@@ -3,115 +3,107 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>FSY Booking Test</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body style="font-family: sans-serif; text-align: center; padding: 40px;">
     <h1>🧘 Free Spirit Yoga</h1>
 
-    <!-- Screen 1: Email entry -->
     <div id="screen-email">
       <p>Enter your email to receive a login code</p>
       <input id="email-input" type="email" placeholder="your@email.com"
         style="padding: 10px; font-size: 16px; width: 280px; border: 1px solid #ccc; border-radius: 8px;" />
       <br><br>
-      <button onclick="sendOTP()"
+      <button id="send-btn"
         style="padding: 10px 30px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
         Send Code
       </button>
       <p id="email-status" style="color: gray;"></p>
     </div>
 
-    <!-- Screen 2: OTP entry -->
     <div id="screen-otp" style="display:none;">
       <p>Enter the 6-digit code sent to your email</p>
       <input id="otp-input" type="number" placeholder="123456"
-        style="padding: 10px; font-size: 24px; width: 160px; text-align: center; border: 1px solid #ccc; border-radius: 8px; letter-spacing: 6px;" />
+        style="padding: 10px; font-size: 24px; width: 160px; text-align: center; border: 1px solid #ccc; border-radius: 8px;" />
       <br><br>
-      <button onclick="verifyOTP()"
+      <button id="verify-btn"
         style="padding: 10px 30px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
         Verify Code
       </button>
       <br><br>
-      <a href="#" onclick="goBack()" style="color: gray; font-size: 14px;">← Use a different email</a>
+      <a href="#" id="back-btn" style="color: gray; font-size: 14px;">← Use a different email</a>
       <p id="otp-status" style="color: gray;"></p>
     </div>
 
-    <!-- Screen 3: Logged in -->
     <div id="screen-success" style="display:none;">
       <p style="font-size: 20px;">✅ Logged in!</p>
       <p id="user-email" style="color: gray;"></p>
-      <button onclick="signOut()"
+      <button id="signout-btn"
         style="padding: 8px 20px; font-size: 14px; background: #ccc; color: #000; border: none; border-radius: 8px; cursor: pointer;">
         Sign Out
       </button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-      const supabase = window.supabase.createClient(
+      var sb = window.supabase.createClient(
         'https://thiqtqxuwfoocbrmrvhx.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaXF0cXh1d2Zvb2Nicm1ydmh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTAxMzAsImV4cCI6MjA5NzA4NjEzMH0.yQiWm1ylsguj9EQxCZGoHU-mKNwGKoN3eqZoDrKCW34'
       )
 
-      let currentEmail = ''
+      var currentEmail = ''
 
-      async function sendOTP() {
-        const email = document.getElementById('email-input').value.trim()
+      document.getElementById('send-btn').addEventListener('click', async function() {
+        var email = document.getElementById('email-input').value.trim()
         if (!email) {
           document.getElementById('email-status').textContent = 'Please enter your email.'
           return
         }
         currentEmail = email
         document.getElementById('email-status').textContent = 'Sending...'
-
-        const { error } = await supabase.auth.signInWithOtp({
+        var result = await sb.auth.signInWithOtp({
           email: email,
           options: { shouldCreateUser: true }
         })
-
-        if (error) {
-          document.getElementById('email-status').textContent = 'Error: ' + error.message
+        if (result.error) {
+          document.getElementById('email-status').textContent = 'Error: ' + result.error.message
         } else {
-          document.getElementById('email-status').textContent = ''
           document.getElementById('screen-email').style.display = 'none'
           document.getElementById('screen-otp').style.display = 'block'
         }
-      }
+      })
 
-      async function verifyOTP() {
-        const token = document.getElementById('otp-input').value.trim()
+      document.getElementById('verify-btn').addEventListener('click', async function() {
+        var token = document.getElementById('otp-input').value.trim()
         if (!token) {
           document.getElementById('otp-status').textContent = 'Please enter the code.'
           return
         }
         document.getElementById('otp-status').textContent = 'Verifying...'
-
-        const { data, error } = await supabase.auth.verifyOtp({
+        var result = await sb.auth.verifyOtp({
           email: currentEmail,
           token: token,
           type: 'email'
         })
-
-        if (error) {
-          document.getElementById('otp-status').textContent = 'Error: ' + error.message
+        if (result.error) {
+          document.getElementById('otp-status').textContent = 'Error: ' + result.error.message
         } else {
           document.getElementById('screen-otp').style.display = 'none'
           document.getElementById('screen-success').style.display = 'block'
-          document.getElementById('user-email').textContent = data.user.email
+          document.getElementById('user-email').textContent = result.data.user.email
         }
-      }
+      })
 
-      function goBack() {
+      document.getElementById('back-btn').addEventListener('click', function() {
         document.getElementById('screen-otp').style.display = 'none'
         document.getElementById('screen-email').style.display = 'block'
         document.getElementById('otp-status').textContent = ''
-      }
+      })
 
-      async function signOut() {
-        await supabase.auth.signOut()
+      document.getElementById('signout-btn').addEventListener('click', async function() {
+        await sb.auth.signOut()
         document.getElementById('screen-success').style.display = 'none'
         document.getElementById('screen-email').style.display = 'block'
         document.getElementById('email-input').value = ''
-      }
+      })
     </script>
   </body>
 </html>
