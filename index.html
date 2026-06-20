@@ -6,104 +6,109 @@
   </head>
   <body style="font-family: sans-serif; text-align: center; padding: 40px;">
     <h1>🧘 Free Spirit Yoga</h1>
+    <p>Class booking test — 1 SAR</p>
+    <p id="status">Loading payment form...</p>
+    <div id="element-container" style="margin: 20px auto; max-width: 400px; text-align: left;"></div>
+    <div id="apple-pay-container" style="margin: 20px auto; max-width: 400px;"></div>
+    <div id="error-handler" style="color:red;"></div>
+    <br>
+    <button id="pay-btn" onclick="pay()" style="padding: 10px 30px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer; display:none;">
+      Pay 1 SAR
+    </button>
 
-    <div id="screen-email">
-      <p>Enter your email to receive a login code</p>
-      <input id="email-input" type="email" placeholder="your@email.com"
-        style="padding: 10px; font-size: 16px; width: 280px; border: 1px solid #ccc; border-radius: 8px;" />
-      <br><br>
-      <button id="send-btn"
-        style="padding: 10px 30px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
-        Send Code
-      </button>
-      <p id="email-status" style="color: gray;"></p>
-    </div>
-
-    <div id="screen-otp" style="display:none;">
-      <p>Enter the 6-digit code sent to your email</p>
-      <input id="otp-input" type="number" placeholder="123456"
-        style="padding: 10px; font-size: 24px; width: 160px; text-align: center; border: 1px solid #ccc; border-radius: 8px;" />
-      <br><br>
-      <button id="verify-btn"
-        style="padding: 10px 30px; font-size: 16px; background: #000; color: #fff; border: none; border-radius: 8px; cursor: pointer;">
-        Verify Code
-      </button>
-      <br><br>
-      <a href="#" id="back-btn" style="color: gray; font-size: 14px;">← Use a different email</a>
-      <p id="otp-status" style="color: gray;"></p>
-    </div>
-
-    <div id="screen-success" style="display:none;">
-      <p style="font-size: 20px;">✅ Logged in!</p>
-      <p id="user-email" style="color: gray;"></p>
-      <button id="signout-btn"
-        style="padding: 8px 20px; font-size: 14px; background: #ccc; color: #000; border: none; border-radius: 8px; cursor: pointer;">
-        Sign Out
-      </button>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://secure.gosell.io/js/sdk/tap.min.js"></script>
     <script>
-      var sb = window.supabase.createClient(
-        'https://thiqtqxuwfoocbrmrvhx.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaXF0cXh1d2Zvb2Nicm1ydmh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTAxMzAsImV4cCI6MjA5NzA4NjEzMH0.yQiWm1ylsguj9EQxCZGoHU-mKNwGKoN3eqZoDrKCW34'
-      )
+      window.onload = function() {
+        var tap = Tapjsli('pk_live_eyRZAXs8pKWbjzqOFSVHQPiJ')
+        var elements = tap.elements({})
 
-      var currentEmail = ''
-
-      document.getElementById('send-btn').addEventListener('click', async function() {
-        var email = document.getElementById('email-input').value.trim()
-        if (!email) {
-          document.getElementById('email-status').textContent = 'Please enter your email.'
-          return
+        var style = {
+          base: {
+            color: '#535353',
+            lineHeight: '18px',
+            fontFamily: 'sans-serif',
+            fontSmoothing: 'antialiased',
+            fontSize: '16px',
+            '::placeholder': { color: 'rgba(0, 0, 0, 0.26)', fontSize: '15px' }
+          },
+          invalid: { color: 'red' }
         }
-        currentEmail = email
-        document.getElementById('email-status').textContent = 'Sending...'
-        var result = await sb.auth.signInWithOtp({
-          email: email,
-          options: { shouldCreateUser: true }
+
+        var paymentOptions = {
+          currencyCode: ['SAR'],
+          labels: { cardNumber: 'Card Number', expirationDate: 'MM/YY', cvv: 'CVV', cardHolder: 'Card Holder Name' },
+          TextDirection: 'ltr',
+          paymentAllowed: ['VISA', 'MASTERCARD', 'MADA', 'APPLE_PAY']
+        }
+
+        // Card widget
+        var card = elements.create('card', { style: style }, paymentOptions)
+        card.mount('#element-container')
+
+        card.addEventListener('change', function(event) {
+          document.getElementById('error-handler').textContent = event.error ? event.error.message : ''
         })
-        if (result.error) {
-          document.getElementById('email-status').textContent = 'Error: ' + result.error.message
-        } else {
-          document.getElementById('screen-email').style.display = 'none'
-          document.getElementById('screen-otp').style.display = 'block'
-        }
-      })
 
-      document.getElementById('verify-btn').addEventListener('click', async function() {
-        var token = document.getElementById('otp-input').value.trim()
-        if (!token) {
-          document.getElementById('otp-status').textContent = 'Please enter the code.'
-          return
-        }
-        document.getElementById('otp-status').textContent = 'Verifying...'
-        var result = await sb.auth.verifyOtp({
-          email: currentEmail,
-          token: token,
-          type: 'email'
+        card.addEventListener('ready', function() {
+          document.getElementById('status').textContent = 'Enter your card details below'
+          document.getElementById('pay-btn').style.display = 'inline-block'
         })
-        if (result.error) {
-          document.getElementById('otp-status').textContent = 'Error: ' + result.error.message
-        } else {
-          document.getElementById('screen-otp').style.display = 'none'
-          document.getElementById('screen-success').style.display = 'block'
-          document.getElementById('user-email').textContent = result.data.user.email
+
+        // Apple Pay button
+        var applePayButton = elements.create('applepay', {
+          style: { height: '48px' },
+          paymentRequest: {
+            country: 'SA',
+            currency: 'SAR',
+            total: { label: 'Free Spirit Yoga', amount: '1.00' }
+          }
+        })
+        applePayButton.mount('#apple-pay-container')
+
+        applePayButton.addEventListener('token', function(token) {
+          chargeToken(token.id)
+        })
+
+        applePayButton.addEventListener('error', function(event) {
+          document.getElementById('error-handler').textContent = event.error ? event.error.message : ''
+        })
+
+        // Card pay button
+        window.pay = function() {
+          document.getElementById('status').textContent = 'Processing...'
+          tap.createToken(card).then(function(result) {
+            if (result.error) {
+              document.getElementById('status').textContent = 'Error: ' + result.error.message
+              return
+            }
+            chargeToken(result.id)
+          })
         }
-      })
 
-      document.getElementById('back-btn').addEventListener('click', function() {
-        document.getElementById('screen-otp').style.display = 'none'
-        document.getElementById('screen-email').style.display = 'block'
-        document.getElementById('otp-status').textContent = ''
-      })
-
-      document.getElementById('signout-btn').addEventListener('click', async function() {
-        await sb.auth.signOut()
-        document.getElementById('screen-success').style.display = 'none'
-        document.getElementById('screen-email').style.display = 'block'
-        document.getElementById('email-input').value = ''
-      })
+        // Shared charge function
+        function chargeToken(tokenId) {
+          document.getElementById('status').textContent = 'Processing...'
+          fetch('/api/charge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: tokenId, amount: 1, currency: 'SAR' })
+          })
+          .then(function(res) { return res.json() })
+          .then(function(charge) {
+            if (charge.status === 'INITIATED' || charge.status === 'CAPTURED') {
+              document.getElementById('status').textContent = '✅ Payment successful! Charge ID: ' + charge.id
+            } else if (charge.transaction && charge.transaction.url) {
+              document.getElementById('status').textContent = 'Redirecting for 3D Secure...'
+              window.top.location.href = charge.transaction.url
+            } else {
+              document.getElementById('status').textContent = 'Payment status: ' + JSON.stringify(charge)
+            }
+          })
+          .catch(function(err) {
+            document.getElementById('status').textContent = 'Error: ' + err.message
+          })
+        }
+      }
     </script>
   </body>
 </html>
