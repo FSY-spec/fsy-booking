@@ -258,6 +258,124 @@
         min-height: auto;
       }
     }
+
+    /* Policies modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-sheet {
+      background: #fff;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      border-radius: 20px 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      background: #2C5C89;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h2 {
+      font-family: 'Merriweather', serif;
+      font-size: 15px;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .modal-tabs {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .modal-tab {
+      flex: 1;
+      padding: 12px 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+      color: #888;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .modal-tab.active {
+      color: #2C5C89;
+      border-bottom-color: #2C5C89;
+    }
+
+    .modal-content {
+      overflow-y: auto;
+      padding: 20px;
+      flex: 1;
+    }
+
+    .modal-panel { display: none; }
+    .modal-panel.active { display: block; }
+
+    .modal-panel h3 {
+      font-family: 'Merriweather', serif;
+      font-size: 13px;
+      color: #A91B60;
+      margin-top: 20px;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #f0e0e8;
+    }
+
+    .modal-panel h3:first-of-type { margin-top: 0; }
+
+    .modal-panel p {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+
+    .modal-panel ul {
+      margin: 4px 0 8px 16px;
+    }
+
+    .modal-panel ul li {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.6;
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
@@ -318,7 +436,7 @@
 
       <p class="terms">
         By continuing, you agree to Free Spirit Yoga's<br>
-        <a href="/fsy_policies.html" target="_blank">Terms &amp; Conditions</a> and <a href="/fsy_policies.html" target="_blank">Privacy Policy</a>
+        <a href="#" onclick="showPolicies('terms')">Terms &amp; Conditions</a> and <a href="#" onclick="showPolicies('privacy')">Privacy Policy</a>
       </p>
     </div>
 
@@ -412,6 +530,151 @@
     document.getElementById('signout-btn').addEventListener('click', async function() {
       await sb.auth.signOut()
     })
+
+    function showPolicies(tab) {
+      document.getElementById('policies-modal').classList.add('open')
+      switchTab(tab)
+    }
+
+    function closePolicies() {
+      document.getElementById('policies-modal').classList.remove('open')
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.modal-panel').forEach(p => p.classList.remove('active'))
+      document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'))
+      document.getElementById('modal-' + tab).classList.add('active')
+      document.getElementById('tab-' + tab).classList.add('active')
+    }
+
+    // Close modal on overlay click
+    window.addEventListener('load', function() {
+      var overlay = document.getElementById('policies-modal')
+      if (overlay) {
+        overlay.addEventListener('click', function(e) {
+          if (e.target === this) closePolicies()
+        })
+      }
+    })
+
   </script>
+
+  <!-- Policies Modal -->
+  <div class="modal-overlay" id="policies-modal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2>Free Spirit Yoga</h2>
+        <button class="modal-close" onclick="closePolicies()">✕</button>
+      </div>
+      <div class="modal-tabs">
+        <div class="modal-tab active" id="tab-terms" onclick="switchTab('terms')">Terms &amp; Conditions</div>
+        <div class="modal-tab" id="tab-privacy" onclick="switchTab('privacy')">Privacy Policy</div>
+      </div>
+      <div class="modal-content">
+
+        <div class="modal-panel active" id="modal-terms">
+          <h3>1. About Free Spirit Yoga</h3>
+          <p>Free Spirit Yoga ("FSY") is a private yoga space operated by Halla, based in Ar-Ruwais, Jeddah, Saudi Arabia. By accessing the app or booking a class, you agree to be bound by these terms.</p>
+          <h3>2. Eligibility</h3>
+          <ul>
+            <li>You must be 18 or older to create an account independently.</li>
+            <li>Minors may participate only with parent or guardian consent.</li>
+            <li>Ladies-only classes are restricted to female students.</li>
+          </ul>
+          <h3>3. Bookings</h3>
+          <ul>
+            <li>All bookings are subject to availability and must be confirmed through the app.</li>
+            <li>Full payment is required at the time of booking.</li>
+            <li>A booking confirmation will be sent to your preferred communication method.</li>
+          </ul>
+          <h3>4. Cancellation &amp; Refund Policy</h3>
+          <ul>
+            <li><strong>8+ hours before class:</strong> Cancel freely — class returned to your package.</li>
+            <li><strong>4–8 hours before class:</strong> Cancel with live countdown — class returned to package.</li>
+            <li><strong>Less than 4 hours:</strong> No cancellation — class counts as used.</li>
+            <li><strong>Late registration (within 4 hours):</strong> Late drop-in rate (SR 120) applies automatically.</li>
+            <li>Classes are transferable to a friend or family member.</li>
+          </ul>
+          <h3>5. Class Packages</h3>
+          <ul>
+            <li>Valid for 3 months from the date of first class attended.</li>
+            <li>Expired packages may be reactivated within 3 months at SR 10 per class.</li>
+            <li>Non-refundable once purchased.</li>
+            <li>One freeze allowed per package (1–4 weeks).</li>
+          </ul>
+          <h3>6. Drop-In Classes</h3>
+          <ul>
+            <li>Early Bird (SR 100): booking more than 4 hours before class.</li>
+            <li>Late Drop-In (SR 120): booking within 4 hours of class.</li>
+            <li>Non-refundable.</li>
+          </ul>
+          <h3>7. Gift Cards &amp; Gifted Classes</h3>
+          <ul>
+            <li>Gift cards have no expiry and are non-refundable.</li>
+            <li>Gifted classes are deducted immediately and non-reversible.</li>
+          </ul>
+          <h3>8. Health &amp; Safety</h3>
+          <ul>
+            <li>You are responsible for determining whether participation is appropriate for your health.</li>
+            <li>Inform the instructor of any injuries or limitations before class.</li>
+            <li>To the fullest extent permitted by law, FSY is released from liability for injury arising from participation, except where caused by gross negligence or wilful misconduct.</li>
+          </ul>
+          <h3>9. Photography &amp; Recording</h3>
+          <p>Photographs or recordings of identifiable students will only be used for promotional purposes with prior consent.</p>
+          <h3>10. Payments</h3>
+          <ul>
+            <li>Payments processed via Tap Payments (Mada, Visa, Mastercard, Apple Pay).</li>
+            <li>FSY does not store your card details.</li>
+            <li>VAT does not apply to FSY classes.</li>
+          </ul>
+          <h3>11. Governing Law</h3>
+          <p>These Terms are governed by the laws of the Kingdom of Saudi Arabia. Disputes are subject to the courts of Jeddah.</p>
+          <p style="margin-top:16px;font-size:12px;color:#aaa;">Last updated: June 2026</p>
+        </div>
+
+        <div class="modal-panel" id="modal-privacy">
+          <h3>1. Who We Are</h3>
+          <p>Free Spirit Yoga ("FSY") is operated by Halla, based in Ar-Ruwais, Jeddah, Saudi Arabia. Contact: thefreespirityoga@gmail.com | WhatsApp: +966 56 463 6203</p>
+          <h3>2. Data We Collect</h3>
+          <ul>
+            <li><strong>Identity:</strong> First name, last name, gender, birth year</li>
+            <li><strong>Contact:</strong> WhatsApp number, email address</li>
+            <li><strong>Health:</strong> Injuries or conditions you choose to share (optional)</li>
+            <li><strong>Booking:</strong> Classes booked, attendance history, class pass status</li>
+            <li><strong>Payment:</strong> Transaction records (we do not store card numbers)</li>
+          </ul>
+          <h3>3. How We Use Your Data</h3>
+          <ul>
+            <li>To create and manage your account</li>
+            <li>To process bookings and payments</li>
+            <li>To send booking confirmations and class reminders</li>
+            <li>To manage your package, freeze requests, and credit balance</li>
+            <li>To comply with Saudi Arabian law</li>
+          </ul>
+          <h3>4. Data Sharing</h3>
+          <p>We do not sell or trade your data. We share only with: Supabase (database), Tap Payments (payments), Unifonic (WhatsApp notifications), and Vercel (hosting). All providers are bound by data processing agreements.</p>
+          <h3>5. Your Rights (PDPL)</h3>
+          <ul>
+            <li>Access the data we hold about you</li>
+            <li>Request correction or deletion of your data</li>
+            <li>Withdraw consent for optional data processing</li>
+          </ul>
+          <p>Contact us to exercise these rights. We respond within 30 days.</p>
+          <h3>6. Data Security</h3>
+          <ul>
+            <li>All data transmitted over encrypted HTTPS connections.</li>
+            <li>Authentication handled securely via Supabase.</li>
+            <li>Card processing handled by certified payment providers only.</li>
+            <li>Admin access restricted to FSY instructor only.</li>
+          </ul>
+          <h3>7. Governing Law</h3>
+          <p>This policy is governed by Saudi Arabia's Personal Data Protection Law (PDPL) and SDAIA regulations.</p>
+          <p style="margin-top:16px;font-size:12px;color:#aaa;">Last updated: June 2026</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
