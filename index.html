@@ -455,45 +455,70 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaXF0cXh1d2Zvb2Nicm1ydmh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MTAxMzAsImV4cCI6MjA5NzA4NjEzMH0.yQiWm1ylsguj9EQxCZGoHU-mKNwGKoN3eqZoDrKCW34'
     )
 
-    // Check if user is already logged in (e.g. returning from magic link)
-    sb.auth.getSession().then(function(res) {
-      if (res.data.session) {
-        showLoggedIn(res.data.session.user.email)
-      }
-    })
+    // ── ROUTING ──────────────────────────────────────────────────────────────
+    // After any successful sign-in, check whether the user has a profile row.
+    // No row  → new student  → New Student Setup
+    // Has row → returning    → My Classes (placeholder until that screen is built)
 
-    // Listen for auth state changes (magic link redirect)
+    async function routeUser(user) {
+      var res = await sb
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (res.error) {
+        // Supabase error — show a safe fallback message on the placeholder screen
+        showPlaceholder(user.email, '⚠️ Could not load your profile. Please try again.')
+        return
+      }
+
+      if (res.data) {
+        // Returning student — has a profile row
+        // Replace with: window.location.href = 'fsy_my_classes.html'  when that screen is built
+        showPlaceholder(user.email, 'Redirecting to My Classes…')
+      } else {
+        // New student — no profile row yet
+        window.location.href = 'fsy_new_student_setup.html'
+      }
+    }
+
+    // Placeholder shown until My Classes screen is built
+    function showPlaceholder(email, message) {
+      document.getElementById('screen-welcome').style.display = 'none'
+      document.getElementById('returning-name').style.display = 'none'
+      var s = document.getElementById('screen-loggedin')
+      s.style.display = 'flex'
+      document.getElementById('loggedin-email').textContent = email
+      document.querySelector('#screen-loggedin p').textContent = message
+    }
+
+    // ── AUTH STATE ────────────────────────────────────────────────────────────
+    // INITIAL_SESSION fires on page load when Supabase detects a session
+    // (including right after a magic-link redirect).
+    // SIGNED_IN fires after OTP exchange completes.
+    // Both need the same routing logic.
+
     sb.auth.onAuthStateChange(function(event, session) {
-      if (event === 'SIGNED_IN' && session) {
-        showLoggedIn(session.user.email)
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+        routeUser(session.user)
       }
       if (event === 'SIGNED_OUT') {
         showWelcome()
       }
     })
 
-    function showLoggedIn(email) {
-      // Returning student — skip welcome screen, go straight to My Classes
-      // When My Classes screen is built, this will navigate there directly
-      document.getElementById('screen-welcome').style.display = 'none'
-      document.getElementById('returning-name').style.display = 'none'
-      var s = document.getElementById('screen-loggedin')
-      s.style.display = 'flex'
-      document.getElementById('loggedin-email').textContent = email
-    }
-
     function showWelcome() {
       document.getElementById('screen-loggedin').style.display = 'none'
       document.getElementById('screen-welcome').style.display = 'flex'
     }
 
-    // Sign in another way toggle
+    // ── MAGIC LINK ────────────────────────────────────────────────────────────
     document.getElementById('other-login-btn').addEventListener('click', function() {
       var el = document.getElementById('email-login')
       el.style.display = el.style.display === 'flex' ? 'none' : 'flex'
     })
 
-    // Magic link
     document.getElementById('magic-btn').addEventListener('click', async function() {
       var email = document.getElementById('magic-email').value.trim()
       var sentMsg = document.getElementById('email-sent-msg')
@@ -506,7 +531,7 @@
         return
       }
 
-      document.getElementById('magic-btn').textContent = 'Sending...'
+      document.getElementById('magic-btn').textContent = 'Sending…'
 
       var result = await sb.auth.signInWithOtp({
         email: email,
@@ -526,11 +551,12 @@
       }
     })
 
-    // Sign out
+    // ── SIGN OUT ──────────────────────────────────────────────────────────────
     document.getElementById('signout-btn').addEventListener('click', async function() {
       await sb.auth.signOut()
     })
 
+    // ── POLICIES MODAL ────────────────────────────────────────────────────────
     function showPolicies(tab) {
       document.getElementById('policies-modal').classList.add('open')
       switchTab(tab)
@@ -547,7 +573,6 @@
       document.getElementById('tab-' + tab).classList.add('active')
     }
 
-    // Close modal on overlay click
     window.addEventListener('load', function() {
       var overlay = document.getElementById('policies-modal')
       if (overlay) {
